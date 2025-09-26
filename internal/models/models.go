@@ -7,59 +7,59 @@ import (
 
 // Item represents a product item
 type Item struct {
-	ID          int       `json:"id" db:"id"`
-	ItemID      string    `json:"itemId" db:"itemId"`
-	Name        string    `json:"name" db:"name"`
-	Price       int       `json:"price" db:"price"`
-	Stock       int       `json:"stock" db:"stock"`
-	IsDeleted   bool      `json:"isDeleted" db:"isDeleted"`
-	CreatedAt   time.Time `json:"createdAt" db:"createdAt"`
-	UpdatedAt   time.Time `json:"updatedAt" db:"updatedAt"`
+	ID        int       `json:"id" db:"id"`
+	ItemID    string    `json:"itemId" db:"itemId"`
+	Name      string    `json:"name" db:"name"`
+	Price     int       `json:"price" db:"price"`
+	Stock     int       `json:"stock" db:"stock"`
+	IsDeleted bool      `json:"isDeleted" db:"isDeleted"`
+	CreatedAt time.Time `json:"createdAt" db:"createdAt"`
+	UpdatedAt time.Time `json:"updatedAt" db:"updatedAt"`
 }
 
 // Store represents a store
 type Store struct {
-	ID          int       `json:"id" db:"id"`
-	StoreID     string    `json:"storeId" db:"storeId"`
-	Name        string    `json:"name" db:"name"`
-	CreatedAt   time.Time `json:"createdAt" db:"createdAt"`
-	UpdatedAt   time.Time `json:"updatedAt" db:"updatedAt"`
+	ID        int       `json:"id" db:"id"`
+	StoreID   string    `json:"storeId" db:"storeId"`
+	Name      string    `json:"name" db:"name"`
+	CreatedAt time.Time `json:"createdAt" db:"createdAt"`
+	UpdatedAt time.Time `json:"updatedAt" db:"updatedAt"`
 }
 
 // Staff represents a staff member
 type Staff struct {
-	ID          int       `json:"id" db:"id"`
-	StaffID     string    `json:"staffId" db:"staffId"`
-	Name        string    `json:"name" db:"name"`
-	CreatedAt   time.Time `json:"createdAt" db:"createdAt"`
-	UpdatedAt   time.Time `json:"updatedAt" db:"updatedAt"`
+	ID        int       `json:"id" db:"id"`
+	StaffID   string    `json:"staffId" db:"staffId"`
+	Name      string    `json:"name" db:"name"`
+	CreatedAt time.Time `json:"createdAt" db:"createdAt"`
+	UpdatedAt time.Time `json:"updatedAt" db:"updatedAt"`
 }
 
 // Sale represents a sale transaction
 type Sale struct {
-	ID          int          `json:"id" db:"id"`
-	StoreID     int          `json:"storeId" db:"storeId"`
-	StaffID     int          `json:"staffId" db:"staffId"`
-	TotalPrice  int          `json:"totalPrice" db:"totalPrice"`
-	Deposit     int          `json:"deposit" db:"deposit"`
-	SaleAt      time.Time    `json:"saleAt" db:"saleAt"`
-	Details     []SaleDetail `json:"details,omitempty"`
-	Store       *Store       `json:"store,omitempty"`
-	Staff       *Staff       `json:"staff,omitempty"`
-	CreatedAt   time.Time    `json:"createdAt" db:"createdAt"`
-	UpdatedAt   time.Time    `json:"updatedAt" db:"updatedAt"`
+	ID         int          `json:"id" db:"id"`
+	StoreID    int          `json:"storeId" db:"storeId"`
+	StaffID    int          `json:"staffId" db:"staffId"`
+	TotalPrice int          `json:"totalPrice" db:"totalPrice"`
+	Deposit    int          `json:"deposit" db:"deposit"`
+	SaleAt     time.Time    `json:"saleAt" db:"saleAt"`
+	Details    []SaleDetail `json:"details,omitempty"`
+	Store      *Store       `json:"store,omitempty"`
+	Staff      *Staff       `json:"staff,omitempty"`
+	CreatedAt  time.Time    `json:"createdAt" db:"createdAt"`
+	UpdatedAt  time.Time    `json:"updatedAt" db:"updatedAt"`
 }
 
 // SaleDetail represents a sale detail item
 type SaleDetail struct {
-	ID          int       `json:"id" db:"id"`
-	SaleID      int       `json:"saleId" db:"saleId"`
-	ItemID      int       `json:"itemId" db:"itemId"`
-	Quantity    int       `json:"quantity" db:"quantity"`
-	Price       int       `json:"price" db:"price"`
-	Item        *Item     `json:"item,omitempty"`
-	CreatedAt   time.Time `json:"createdAt" db:"createdAt"`
-	UpdatedAt   time.Time `json:"updatedAt" db:"updatedAt"`
+	ID        int       `json:"id" db:"id"`
+	SaleID    int       `json:"saleId" db:"saleId"`
+	ItemID    int       `json:"itemId" db:"itemId"`
+	Quantity  int       `json:"quantity" db:"quantity"`
+	Price     int       `json:"price" db:"price"`
+	Item      *Item     `json:"item,omitempty"`
+	CreatedAt time.Time `json:"createdAt" db:"createdAt"`
+	UpdatedAt time.Time `json:"updatedAt" db:"updatedAt"`
 }
 
 // Setting represents a configuration setting
