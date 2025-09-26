@@ -115,6 +115,23 @@ func (r *ItemRepository) Delete(id int) error {
 	return err
 }
 
+func (r *ItemRepository) FindByBarcode(barcode string) (*models.Item, error) {
+	query := `SELECT id, itemId, name, price, stock, isDeleted, createdAt, updatedAt
+			  FROM item WHERE itemId = ? AND isDeleted = 0`
+
+	item := &models.Item{}
+	err := r.db.QueryRow(query, barcode).Scan(&item.ID, &item.ItemID, &item.Name,
+		&item.Price, &item.Stock, &item.IsDeleted, &item.CreatedAt, &item.UpdatedAt)
+
+	if err == sql.ErrNoRows {
+		return nil, fmt.Errorf("item not found")
+	}
+	if err != nil {
+		return nil, err
+	}
+	return item, nil
+}
+
 // StoreRepository handles store data access
 type StoreRepository struct {
 	db *sql.DB
@@ -241,6 +258,40 @@ func (r *StaffRepository) Create(staff *models.Staff) error {
 	return nil
 }
 
+func (r *StaffRepository) Update(staff *models.Staff) error {
+	query := `UPDATE staff SET name = ?, updatedAt = ? WHERE id = ?`
+
+	now := time.Now()
+	_, err := r.db.Exec(query, staff.Name, now, staff.ID)
+	if err != nil {
+		return err
+	}
+	staff.UpdatedAt = now
+	return nil
+}
+
+func (r *StaffRepository) Delete(id int) error {
+	query := `DELETE FROM staff WHERE id = ?`
+	_, err := r.db.Exec(query, id)
+	return err
+}
+
+func (r *StaffRepository) FindByBarcode(barcode string) (*models.Staff, error) {
+	query := `SELECT id, staffId, name, createdAt, updatedAt FROM staff WHERE staffId = ?`
+
+	staff := &models.Staff{}
+	err := r.db.QueryRow(query, barcode).Scan(&staff.ID, &staff.StaffID,
+		&staff.Name, &staff.CreatedAt, &staff.UpdatedAt)
+
+	if err == sql.ErrNoRows {
+		return nil, fmt.Errorf("staff not found")
+	}
+	if err != nil {
+		return nil, err
+	}
+	return staff, nil
+}
+
 // SaleRepository handles sale data access
 type SaleRepository struct {
 	db *sql.DB
@@ -356,5 +407,47 @@ func (r *SettingRepository) Update(key, value string) error {
 	query := `UPDATE setting SET value = ?, updatedAt = ? WHERE key = ?`
 
 	_, err := r.db.Exec(query, value, time.Now(), key)
+	return err
+}
+
+func (r *SettingRepository) FindByKey(key string) (*models.Setting, error) {
+	query := `SELECT id, key, value, type, description, createdAt, updatedAt FROM setting WHERE key = ?`
+
+	setting := &models.Setting{}
+	err := r.db.QueryRow(query, key).Scan(&setting.ID, &setting.Key, &setting.Value,
+		&setting.Type, &setting.Description, &setting.CreatedAt, &setting.UpdatedAt)
+
+	if err == sql.ErrNoRows {
+		return nil, fmt.Errorf("setting not found")
+	}
+	if err != nil {
+		return nil, err
+	}
+	return setting, nil
+}
+
+func (r *SettingRepository) Create(setting *models.Setting) error {
+	query := `INSERT INTO setting (key, value, type, description, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?)`
+
+	now := time.Now()
+	result, err := r.db.Exec(query, setting.Key, setting.Value, setting.Type, setting.Description, now, now)
+	if err != nil {
+		return err
+	}
+
+	id, err := result.LastInsertId()
+	if err != nil {
+		return err
+	}
+	setting.ID = int(id)
+	setting.CreatedAt = now
+	setting.UpdatedAt = now
+
+	return nil
+}
+
+func (r *SettingRepository) Delete(key string) error {
+	query := `DELETE FROM setting WHERE key = ?`
+	_, err := r.db.Exec(query, key)
 	return err
 }
