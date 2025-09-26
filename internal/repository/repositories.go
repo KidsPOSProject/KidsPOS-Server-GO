@@ -283,7 +283,9 @@ func (r *SaleRepository) Create(sale *models.Sale) error {
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback()
+	defer func() {
+		_ = tx.Rollback()
+	}()
 
 	// Insert sale
 	query := `INSERT INTO sale (storeId, staffId, totalPrice, deposit, saleAt, createdAt, updatedAt)
