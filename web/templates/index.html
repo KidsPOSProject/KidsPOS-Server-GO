@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.title}} - KidsPOS</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="/">KidsPOS</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/items">商品</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/sales">販売</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/stores">店舗</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/staffs">スタッフ</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/reports/sales">レポート</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/settings">設定</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-12">
+                <h1 class="mb-4">KidsPOS - 子供向けPOSシステム</h1>
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">商品管理</h5>
+                                <p class="card-text">商品の追加・編集・削除ができます</p>
+                                <a href="/items" class="btn btn-primary">商品一覧へ</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">販売登録</h5>
+                                <p class="card-text">新規販売の登録ができます</p>
+                                <a href="/sales/new" class="btn btn-success">販売登録へ</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">売上レポート</h5>
+                                <p class="card-text">売上の確認ができます</p>
+                                <a href="/reports/sales" class="btn btn-info">レポートへ</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
