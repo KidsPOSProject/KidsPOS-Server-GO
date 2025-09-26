@@ -79,6 +79,8 @@ jobs:
 
     - name: Build for multiple platforms
       run: |
+        mkdir -p dist
+
         # Linux AMD64
         GOOS=linux GOARCH=amd64 go build -o dist/kidspos-linux-amd64 ./cmd/server
 
