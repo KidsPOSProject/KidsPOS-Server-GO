@@ -81,6 +81,14 @@ func (s *ItemService) DeleteItem(id int) error {
 	return s.repo.Delete(id)
 }
 
+func (s *ItemService) GetItemByID(id int) (*models.Item, error) {
+	return s.repo.FindByID(id)
+}
+
+func (s *ItemService) GetItemByBarcode(barcode string) (*models.Item, error) {
+	return s.repo.FindByBarcode(barcode)
+}
+
 func (s *ItemService) generateItemID() string {
 	// Generate unique item ID with prefix
 	return fmt.Sprintf("ITEM-%s", uuid.New().String()[:8])
@@ -142,6 +150,49 @@ func (s *StaffService) CreateStaff(staff *models.Staff) error {
 	}
 
 	return s.repo.Create(staff)
+}
+
+func (s *StaffService) GetAllStaff() ([]*models.Staff, error) {
+	return s.repo.FindAll()
+}
+
+func (s *StaffService) GetStaffByBarcode(barcode string) (*models.Staff, error) {
+	return s.repo.FindByBarcode(barcode)
+}
+
+func (s *StaffService) UpdateStaff(staff *models.Staff) error {
+	// Validate
+	if staff.Name == "" {
+		return fmt.Errorf("staff name is required")
+	}
+
+	return s.repo.Update(staff)
+}
+
+func (s *StaffService) UpdateStaffByBarcode(barcode string, staff *models.Staff) error {
+	// Find existing staff by barcode
+	existingStaff, err := s.repo.FindByBarcode(barcode)
+	if err != nil {
+		return err
+	}
+
+	// Update fields
+	existingStaff.Name = staff.Name
+	return s.repo.Update(existingStaff)
+}
+
+func (s *StaffService) DeleteStaff(id int) error {
+	return s.repo.Delete(id)
+}
+
+func (s *StaffService) DeleteStaffByBarcode(barcode string) error {
+	// Find staff by barcode first
+	staff, err := s.repo.FindByBarcode(barcode)
+	if err != nil {
+		return err
+	}
+
+	return s.repo.Delete(staff.ID)
 }
 
 func (s *StaffService) generateStaffID() string {
@@ -220,6 +271,22 @@ func (s *SettingService) GetAllSettings() ([]*models.Setting, error) {
 	return s.repo.FindAll()
 }
 
+func (s *SettingService) GetSetting(key string) (*models.Setting, error) {
+	return s.repo.FindByKey(key)
+}
+
+func (s *SettingService) CreateSetting(setting *models.Setting) error {
+	// Validate
+	if setting.Key == "" {
+		return fmt.Errorf("setting key is required")
+	}
+	if setting.Value == "" {
+		return fmt.Errorf("setting value is required")
+	}
+
+	return s.repo.Create(setting)
+}
+
 func (s *SettingService) UpdateSetting(key, value string) error {
 	if key == "" {
 		return fmt.Errorf("setting key is required")
@@ -229,4 +296,12 @@ func (s *SettingService) UpdateSetting(key, value string) error {
 	}
 
 	return s.repo.Update(key, value)
+}
+
+func (s *SettingService) DeleteSetting(key string) error {
+	if key == "" {
+		return fmt.Errorf("setting key is required")
+	}
+
+	return s.repo.Delete(key)
 }

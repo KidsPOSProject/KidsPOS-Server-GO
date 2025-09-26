@@ -1,0 +1,22 @@
+{
+  "name": "kidspos-e2e",
+  "version": "1.0.0",
+  "description": "E2E tests for KidsPOS Server",
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:ui": "playwright test --ui",
+    "test:vrt": "playwright test --grep @vrt",
+    "update-snapshots": "playwright test --update-snapshots"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.55.1"
+  },
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

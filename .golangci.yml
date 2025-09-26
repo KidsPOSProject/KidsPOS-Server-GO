@@ -1,0 +1,22 @@
+linters:
+  enable:
+    - gofmt
+    - govet
+    - errcheck
+    - staticcheck
+    - gosimple
+    - ineffassign
+    - unused
+
+linters-settings:
+  errcheck:
+    check-type-assertions: false
+    check-blank: false
+
+issues:
+  exclude-dirs:
+    - vendor
+    - e2e
+  exclude-files:
+    - ".*\\.pb\\.go$"
+    - ".*_test\\.go$"
