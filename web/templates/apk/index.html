@@ -1,109 +1,163 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{.title}} - KidsPOS</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body>
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-    <div class="container">
-        <a class="navbar-brand" href="/">KidsPOS</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav">
-                <li class="nav-item">
-                    <a class="nav-link" href="/items">商品</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/sales">販売</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/stores">店舗</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/staffs">スタッフ</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/reports/sales">レポート</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/settings">設定</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link active" href="/apk">APK管理</a>
-                </li>
-            </ul>
+{{define "content"}}
+<!-- Page Header -->
+<div class="page-header d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="page-title">
+            <i class="fas fa-android"></i> APKバージョン管理
+        </h1>
+        <p class="page-subtitle">Android APKファイルのアップロードと配布管理</p>
+    </div>
+    <div>
+        <a href="/apk/upload" class="btn btn-modern btn-modern-primary">
+            <i class="fas fa-upload"></i> 新規アップロード
+        </a>
+    </div>
+</div>
+
+{{if .error}}
+<div class="alert alert-danger alert-dismissible fade show" role="alert">
+    <i class="fas fa-exclamation-triangle"></i> {{.error}}
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+{{end}}
+
+{{if .versions}}
+<div class="row">
+    {{range $index, $version := .versions}}
+    <div class="col-md-6 col-lg-4 mb-4">
+        <div class="card-modern h-100">
+            <div class="card-body">
+                <!-- Version Badge -->
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div>
+                        <h5 class="mb-1">
+                            <i class="fab fa-android text-success"></i>
+                            バージョン {{$version.Version}}
+                        </h5>
+                        <small class="text-muted">コード: {{$version.VersionCode}}</small>
+                    </div>
+                    <div>
+                        {{if $version.IsActive}}
+                        <span class="badge bg-success">
+                            <i class="fas fa-check-circle"></i> 最新
+                        </span>
+                        {{else}}
+                        <span class="badge bg-secondary">旧バージョン</span>
+                        {{end}}
+                    </div>
+                </div>
+
+                <!-- File Info -->
+                <div class="mb-3">
+                    <div class="d-flex align-items-center mb-2">
+                        <i class="fas fa-file text-primary me-2"></i>
+                        <small class="text-muted">{{$version.FileName}}</small>
+                    </div>
+                    <div class="d-flex align-items-center mb-2">
+                        <i class="fas fa-hdd text-info me-2"></i>
+                        <small class="text-muted">{{$version.FileSize}} bytes</small>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-clock text-warning me-2"></i>
+                        <small class="text-muted">{{$version.UploadedAt.Format "2006年01月02日 15:04"}}</small>
+                    </div>
+                </div>
+
+                <!-- Release Notes -->
+                {{if $version.ReleaseNotes}}
+                <div class="mb-3">
+                    <strong class="d-block mb-1"><i class="fas fa-info-circle"></i> リリースノート:</strong>
+                    <p class="text-muted small mb-0" style="white-space: pre-wrap;">{{$version.ReleaseNotes}}</p>
+                </div>
+                {{end}}
+
+                <!-- Download Actions -->
+                <div class="d-grid gap-2">
+                    <a href="/api/apk/download/{{$version.ID}}" class="btn btn-modern btn-modern-primary">
+                        <i class="fas fa-mobile-alt"></i> インストール
+                    </a>
+                    <a href="/api/apk/download/{{$version.ID}}" class="btn btn-modern btn-modern-success" download>
+                        <i class="fas fa-download"></i> ダウンロード
+                    </a>
+                    <button class="btn btn-modern btn-modern-info btn-sm" onclick="showQRCode('{{$version.ID}}', '{{$version.Version}}')">
+                        <i class="fas fa-qrcode"></i> QRコード表示
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
-</nav>
+    {{end}}
+</div>
+{{else}}
+<div class="card-modern">
+    <div class="card-body text-center py-5">
+        <i class="fas fa-android fa-4x text-muted mb-3"></i>
+        <h5 class="text-muted">登録されているAPKバージョンはありません</h5>
+        <p class="text-muted mb-4">最初のAPKファイルをアップロードしてください</p>
+        <a href="/apk/upload" class="btn btn-modern btn-modern-primary">
+            <i class="fas fa-upload"></i> 今すぐアップロード
+        </a>
+    </div>
+</div>
+{{end}}
 
-<div class="container mt-5">
-    <div class="row">
-        <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h1>APKバージョン管理</h1>
-                <a href="/apk/upload" class="btn btn-primary">新規アップロード</a>
-            </div>
+<!-- Back Button -->
+<div class="mt-4">
+    <a href="/" class="btn btn-modern btn-modern-secondary">
+        <i class="fas fa-arrow-left"></i> ダッシュボードへ戻る
+    </a>
+</div>
 
-            {{if .error}}
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                {{.error}}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-            {{end}}
 
-            {{if .versions}}
-            <div class="table-responsive">
-                <table class="table table-striped table-hover">
-                    <thead class="table-dark">
-                        <tr>
-                            <th>バージョン</th>
-                            <th>バージョンコード</th>
-                            <th>ファイル名</th>
-                            <th>サイズ</th>
-                            <th>リリースノート</th>
-                            <th>状態</th>
-                            <th>アップロード日時</th>
-                            <th>操作</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {{range .versions}}
-                        <tr>
-                            <td><strong>{{.Version}}</strong></td>
-                            <td>{{.VersionCode}}</td>
-                            <td>{{.FileName}}</td>
-                            <td>{{printf "%.2f" (div .FileSize 1048576.0)}} MB</td>
-                            <td>{{if .ReleaseNotes}}{{.ReleaseNotes}}{{else}}-{{end}}</td>
-                            <td>
-                                {{if .IsActive}}
-                                <span class="badge bg-success">有効</span>
-                                {{else}}
-                                <span class="badge bg-secondary">無効</span>
-                                {{end}}
-                            </td>
-                            <td>{{.UploadedAt.Format "2006-01-02 15:04"}}</td>
-                            <td>
-                                <a href="/api/apk/download/{{.ID}}" class="btn btn-sm btn-primary" download>ダウンロード</a>
-                            </td>
-                        </tr>
-                        {{end}}
-                    </tbody>
-                </table>
+<!-- QR Code Modal -->
+<div class="modal fade" id="qrcodeModal" tabindex="-1" data-bs-backdrop="false">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-qrcode"></i> APKダウンロード QRコード
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-            {{else}}
-            <div class="alert alert-info" role="alert">
-                登録されているAPKバージョンはありません。
+            <div class="modal-body text-center">
+                <p class="mb-3">スマートフォンでこのQRコードをスキャンしてダウンロード</p>
+                <div id="qrcode-container" class="d-flex justify-content-center mb-3"></div>
+                <p class="text-muted small mb-0" id="qrcode-url"></p>
             </div>
-            {{end}}
+            <div class="modal-footer">
+                <button type="button" class="btn btn-modern btn-modern-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times"></i> 閉じる
+                </button>
+            </div>
         </div>
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+<script>
+function showQRCode(versionId, versionName) {
+    // Clear previous QR code
+    document.getElementById('qrcode-container').innerHTML = '';
+
+    // Build download URL
+    const downloadUrl = window.location.origin + '/api/apk/download/' + versionId;
+    document.getElementById('qrcode-url').textContent = downloadUrl;
+
+    // Generate QR code
+    new QRCode(document.getElementById('qrcode-container'), {
+        text: downloadUrl,
+        width: 256,
+        height: 256,
+        colorDark: '#4F46E5',
+        colorLight: '#ffffff',
+        correctLevel: QRCode.CorrectLevel.H
+    });
+
+    // Show modal without backdrop
+    const modalEl = document.getElementById('qrcodeModal');
+    const modal = new bootstrap.Modal(modalEl, {
+        backdrop: false
+    });
+    modal.show();
+}
+</script>
+{{end}}
