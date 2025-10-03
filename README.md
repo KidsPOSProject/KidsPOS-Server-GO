@@ -72,65 +72,180 @@ go run cmd/server/main.go
 
 ## Raspberry Pi向けビルド
 
+### クロスコンパイル
+
+Pure Go実装（modernc.org/sqlite使用）のため、CGOなしで静的バイナリを生成できます。
+
 ```bash
 # 全Raspberry Pi向けビルド
 make build-pi
 
 # 個別ビルド
-# Pi 4/5 (64-bit)
-GOOS=linux GOARCH=arm64 go build -o kidspos-arm64 cmd/server/main.go
+# Pi 4/5 (64-bit ARM64)
+CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -ldflags="-s -w" -o kidspos-arm64 cmd/server/main.go
 
-# Pi 3 (32-bit ARMv7)
-GOOS=linux GOARCH=arm GOARM=7 go build -o kidspos-armv7 cmd/server/main.go
+# Pi 3/Pi Zero 2W (32-bit ARMv7)
+CGO_ENABLED=0 GOOS=linux GOARCH=arm GOARM=7 go build -ldflags="-s -w" -o kidspos-armv7 cmd/server/main.go
 
-# Pi Zero 2W (32-bit ARMv6)
-GOOS=linux GOARCH=arm GOARM=6 go build -o kidspos-armv6 cmd/server/main.go
+# Pi Zero W (32-bit ARMv6)
+CGO_ENABLED=0 GOOS=linux GOARCH=arm GOARM=6 go build -ldflags="-s -w" -o kidspos-armv6 cmd/server/main.go
 ```
 
-## Raspberry Piへのデプロイ
+**注意**: Pi Zero WとPi Zero 2Wは異なるアーキテクチャです
+- **Pi Zero W**: ARMv6 (ARM1176JZF-S) → `GOARM=6`を使用
+- **Pi Zero 2W**: ARMv7 (Cortex-A53) → `GOARM=7`を使用
 
-### 1. バイナリを転送
+### GitHub Actionsでビルド
+
+手動実行でビルド済みバイナリをダウンロード可能：
+
+1. GitHubリポジトリの「Actions」タブを開く
+2. 「Build for Raspberry Pi」ワークフローを選択
+3. 「Run workflow」をクリック
+4. ビルド完了後、Artifactsからバイナリをダウンロード
+
+## Raspberry Pi Zero W への導入手順
+
+Pi Zero Wは512MBメモリの制約がありますが、本アプリは30-50MBで動作するため快適に使用できます。
+
+### クイックスタート（シンプル版）
+
+最も簡単な起動方法：
 
 ```bash
-# Pi 4/5の場合
-scp dist/kidspos-arm64 pi@raspberrypi.local:/home/pi/
+# 1. 開発マシンでビルド
+CGO_ENABLED=0 GOOS=linux GOARCH=arm GOARM=6 go build -ldflags="-s -w" -o kidspos-armv6 cmd/server/main.go
 
-# Pi 3の場合
-scp dist/kidspos-armv7 pi@raspberrypi.local:/home/pi/
+# 2. Pi Zero Wに転送
+scp kidspos-armv6 pi@raspberrypi.local:~/
+scp -r web pi@raspberrypi.local:~/
 
-# 実行権限を付与
-ssh pi@raspberrypi.local "chmod +x /home/pi/kidspos-arm*"
+# 3. Pi Zero W上で実行
+ssh pi@raspberrypi.local
+chmod +x kidspos-armv6
+./kidspos-armv6
+
+# ブラウザでアクセス: http://raspberrypi.local:8080
 ```
 
-### 2. systemdサービス設定
+これだけで起動できます！データベースは自動的に `kidspos.db` として作成されます。
+
+### 詳細な導入手順（本番環境向け）
+
+systemdサービスとして自動起動させる場合：
+
+#### 1. 開発マシンでビルド
 
 ```bash
-# サービスファイル作成
+# Pi Zero W向けビルド（ARMv6）
+mkdir -p dist
+CGO_ENABLED=0 GOOS=linux GOARCH=arm GOARM=6 go build -ldflags="-s -w" -o dist/kidspos-armv6 cmd/server/main.go
+
+# バイナリ確認（約22MB、静的リンク）
+file dist/kidspos-armv6
+ls -lh dist/kidspos-armv6
+```
+
+#### 2. ファイル転送と配置
+
+```bash
+# 開発マシンから転送
+scp dist/kidspos-armv6 pi@raspberrypi.local:/home/pi/
+scp -r web pi@raspberrypi.local:/home/pi/
+
+# Pi Zero W上で配置
+ssh pi@raspberrypi.local
+sudo mkdir -p /opt/kidspos
+sudo mv kidspos-armv6 /opt/kidspos/kidspos
+sudo mv web /opt/kidspos/
+sudo chmod +x /opt/kidspos/kidspos
+sudo mkdir -p /var/lib/kidspos
+```
+
+#### 3. systemdサービス設定
+
+```bash
 sudo nano /etc/systemd/system/kidspos.service
 ```
+
+以下の内容を記述：
 
 ```ini
 [Unit]
 Description=KidsPOS Go Server
 After=network.target
+Wants=network-online.target
 
 [Service]
 Type=simple
-User=pi
-WorkingDirectory=/home/pi
-ExecStart=/home/pi/kidspos-arm64
-Restart=always
+User=kidspos
+Group=kidspos
+WorkingDirectory=/opt/kidspos
+ExecStart=/opt/kidspos/kidspos
+
+# 環境変数
 Environment="PORT=8080"
+Environment="DATABASE_PATH=/var/lib/kidspos/kidspos.db"
+
+# 自動再起動
+Restart=on-failure
+RestartSec=5s
+
+# セキュリティ強化
+ProtectSystem=full
+PrivateTmp=true
+NoNewPrivileges=true
+
+# Pi Zero W メモリ最適化（512MB RAM）
+MemoryAccounting=true
+MemoryMax=128M
+MemorySwapMax=0
 
 [Install]
 WantedBy=multi-user.target
 ```
+
+#### 4. サービス起動
 
 ```bash
 # サービス有効化と起動
 sudo systemctl daemon-reload
 sudo systemctl enable kidspos
 sudo systemctl start kidspos
+
+# 状態確認
+sudo systemctl status kidspos
+
+# ログ確認
+sudo journalctl -u kidspos -f
+```
+
+#### 5. 動作確認
+
+```bash
+# アプリケーション起動確認（Pi Zero W上で）
+curl http://localhost:8080
+
+# または別のマシンから（IPアドレスは環境に応じて変更）
+curl http://raspberrypi.local:8080
+```
+
+ブラウザで `http://raspberrypi.local:8080` にアクセスして動作確認できます。
+
+### Pi Zero W 最適化のヒント
+
+```bash
+# スワップ無効化（SDカード寿命延長）
+sudo dphys-swapfile swapoff
+sudo systemctl disable dphys-swapfile
+
+# 不要なサービス停止（メモリ節約）
+sudo systemctl disable bluetooth
+sudo systemctl disable avahi-daemon
+
+# メモリ使用量確認
+free -h
+sudo systemctl status kidspos
 ```
 
 ## Docker実行

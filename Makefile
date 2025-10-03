@@ -44,14 +44,18 @@ clean:
 	rm -f kidspos.db
 
 # Build for Raspberry Pi (ARM architectures)
+# Using CGO_ENABLED=0 for static binaries (Pure Go with modernc.org/sqlite)
 build-pi:
 	@echo "Building for Raspberry Pi 4/5 (ARM64)..."
-	GOOS=linux GOARCH=arm64 go build -ldflags="-s -w" -o dist/kidspos-arm64 cmd/server/main.go
-	@echo "Building for Raspberry Pi 3 (ARMv7)..."
-	GOOS=linux GOARCH=arm GOARM=7 go build -ldflags="-s -w" -o dist/kidspos-armv7 cmd/server/main.go
-	@echo "Building for Raspberry Pi Zero 2 W (ARMv6)..."
-	GOOS=linux GOARCH=arm GOARM=6 go build -ldflags="-s -w" -o dist/kidspos-armv6 cmd/server/main.go
+	CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -ldflags="-s -w" -o dist/kidspos-arm64 cmd/server/main.go
+	@echo "Building for Raspberry Pi 3/Zero 2W (ARMv7)..."
+	CGO_ENABLED=0 GOOS=linux GOARCH=arm GOARM=7 go build -ldflags="-s -w" -o dist/kidspos-armv7 cmd/server/main.go
+	@echo "Building for Raspberry Pi Zero W (ARMv6)..."
+	CGO_ENABLED=0 GOOS=linux GOARCH=arm GOARM=6 go build -ldflags="-s -w" -o dist/kidspos-armv6 cmd/server/main.go
 	@echo "Builds complete! Files in dist/"
+	@echo ""
+	@echo "Binary sizes:"
+	@ls -lh dist/kidspos-arm*
 
 # Deploy to Raspberry Pi (requires SSH access)
 deploy-pi:

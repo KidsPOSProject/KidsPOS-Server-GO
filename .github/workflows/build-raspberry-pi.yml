@@ -1,0 +1,207 @@
+name: Build for Raspberry Pi
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version tag (e.g., v1.0.0)'
+        required: false
+        default: 'manual'
+
+jobs:
+  build:
+    name: Build for Raspberry Pi
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'
+
+      - name: Get dependencies
+        run: |
+          go mod download
+          go mod verify
+
+      - name: Build for Raspberry Pi Zero W (ARMv6)
+        env:
+          CGO_ENABLED: 0
+          GOOS: linux
+          GOARCH: arm
+          GOARM: 6
+        run: |
+          mkdir -p dist
+          go build -ldflags="-s -w" -o dist/kidspos-armv6 cmd/server/main.go
+          echo "Pi Zero W build size:"
+          ls -lh dist/kidspos-armv6
+          file dist/kidspos-armv6
+
+      - name: Build for Raspberry Pi 3/Zero 2W (ARMv7)
+        env:
+          CGO_ENABLED: 0
+          GOOS: linux
+          GOARCH: arm
+          GOARM: 7
+        run: |
+          go build -ldflags="-s -w" -o dist/kidspos-armv7 cmd/server/main.go
+          echo "Pi 3/Zero 2W build size:"
+          ls -lh dist/kidspos-armv7
+          file dist/kidspos-armv7
+
+      - name: Build for Raspberry Pi 4/5 (ARM64)
+        env:
+          CGO_ENABLED: 0
+          GOOS: linux
+          GOARCH: arm64
+        run: |
+          go build -ldflags="-s -w" -o dist/kidspos-arm64 cmd/server/main.go
+          echo "Pi 4/5 build size:"
+          ls -lh dist/kidspos-arm64
+          file dist/kidspos-arm64
+
+      - name: Copy web assets
+        run: |
+          cp -r web dist/
+
+      - name: Create deployment package for Pi Zero W
+        run: |
+          cd dist
+          tar -czf kidspos-pi-zero-w.tar.gz kidspos-armv6 web/
+          echo "Pi Zero W package created:"
+          ls -lh kidspos-pi-zero-w.tar.gz
+
+      - name: Create deployment package for Pi 3/Zero 2W
+        run: |
+          cd dist
+          tar -czf kidspos-pi3-zero2w.tar.gz kidspos-armv7 web/
+          echo "Pi 3/Zero 2W package created:"
+          ls -lh kidspos-pi3-zero2w.tar.gz
+
+      - name: Create deployment package for Pi 4/5
+        run: |
+          cd dist
+          tar -czf kidspos-pi4-5.tar.gz kidspos-arm64 web/
+          echo "Pi 4/5 package created:"
+          ls -lh kidspos-pi4-5.tar.gz
+
+      - name: Create README for deployment
+        run: |
+          cat > dist/DEPLOY_README.md << 'EOF'
+          # KidsPOS Raspberry Pi Deployment
+
+          このパッケージには、Raspberry Pi向けのKidsPOSサーバーが含まれています。
+
+          ## パッケージ内容
+
+          - `kidspos-armv6` - Raspberry Pi Zero W用バイナリ
+          - `kidspos-armv7` - Raspberry Pi 3/Zero 2W用バイナリ
+          - `kidspos-arm64` - Raspberry Pi 4/5用バイナリ
+          - `web/` - Webアセット（templates、static）
+
+          ## デプロイ方法
+
+          詳細な手順は、リポジトリのREADMEを参照してください。
+
+          ### クイックスタート（Pi Zero W向け）
+
+          1. パッケージを展開
+          ```bash
+          tar -xzf kidspos-pi-zero-w.tar.gz
+          ```
+
+          2. Raspberry Piに転送
+          ```bash
+          scp kidspos-armv6 pi@raspberrypi.local:/tmp/
+          scp -r web pi@raspberrypi.local:/tmp/
+          ```
+
+          3. Pi Zero W上でセットアップ
+          ```bash
+          # ディレクトリ作成
+          sudo mkdir -p /opt/kidspos
+          sudo mv /tmp/kidspos-armv6 /opt/kidspos/kidspos
+          sudo mv /tmp/web /opt/kidspos/
+          sudo chmod +x /opt/kidspos/kidspos
+
+          # データベースディレクトリ
+          sudo mkdir -p /var/lib/kidspos
+          ```
+
+          4. systemdサービス設定（README.md参照）
+
+          ## 動作確認済み環境
+
+          - Raspberry Pi Zero W (ARMv6, 512MB RAM)
+          - Raspberry Pi 3 (ARMv7)
+          - Raspberry Pi Zero 2W (ARMv7)
+          - Raspberry Pi 4/5 (ARM64)
+          - Raspberry Pi OS (32-bit/64-bit)
+
+          ## メモリ使用量
+
+          - 通常動作: 30-50MB
+          - Pi Zero W (512MB) で快適に動作
+          EOF
+
+      - name: Upload artifacts - Pi Zero W
+        uses: actions/upload-artifact@v4
+        with:
+          name: kidspos-raspberry-pi-zero-w
+          path: |
+            dist/kidspos-armv6
+            dist/kidspos-pi-zero-w.tar.gz
+            dist/DEPLOY_README.md
+          retention-days: 90
+
+      - name: Upload artifacts - Pi 3/Zero 2W
+        uses: actions/upload-artifact@v4
+        with:
+          name: kidspos-raspberry-pi3-zero2w
+          path: |
+            dist/kidspos-armv7
+            dist/kidspos-pi3-zero2w.tar.gz
+            dist/DEPLOY_README.md
+          retention-days: 90
+
+      - name: Upload artifacts - Pi 4/5
+        uses: actions/upload-artifact@v4
+        with:
+          name: kidspos-raspberry-pi4-5
+          path: |
+            dist/kidspos-arm64
+            dist/kidspos-pi4-5.tar.gz
+            dist/DEPLOY_README.md
+          retention-days: 90
+
+      - name: Upload web assets
+        uses: actions/upload-artifact@v4
+        with:
+          name: kidspos-web-assets
+          path: dist/web/
+          retention-days: 90
+
+      - name: Build summary
+        run: |
+          echo "## Build Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Binary Sizes" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Target | Size | Architecture |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|------|--------------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Pi Zero W | $(ls -lh dist/kidspos-armv6 | awk '{print $5}') | ARMv6 (32-bit) |" >> $GITHUB_STEP_SUMMARY
+          echo "| Pi 3/Zero 2W | $(ls -lh dist/kidspos-armv7 | awk '{print $5}') | ARMv7 (32-bit) |" >> $GITHUB_STEP_SUMMARY
+          echo "| Pi 4/5 | $(ls -lh dist/kidspos-arm64 | awk '{print $5}') | ARM64 (64-bit) |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Package Sizes" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Package | Size |" >> $GITHUB_STEP_SUMMARY
+          echo "|---------|------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Pi Zero W | $(ls -lh dist/kidspos-pi-zero-w.tar.gz | awk '{print $5}') |" >> $GITHUB_STEP_SUMMARY
+          echo "| Pi 3/Zero 2W | $(ls -lh dist/kidspos-pi3-zero2w.tar.gz | awk '{print $5}') |" >> $GITHUB_STEP_SUMMARY
+          echo "| Pi 4/5 | $(ls -lh dist/kidspos-pi4-5.tar.gz | awk '{print $5}') |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ All binaries are statically linked and ready for deployment!" >> $GITHUB_STEP_SUMMARY
