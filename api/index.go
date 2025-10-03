@@ -3,6 +3,8 @@ package handler
 import (
 	"log"
 	"net/http"
+	"os"
+	"path/filepath"
 
 	"github.com/KidsPOSProject/KidsPOS-Server-GO/pkg/config"
 	"github.com/KidsPOSProject/KidsPOS-Server-GO/pkg/handlers"
@@ -41,13 +43,28 @@ func init() {
 	// Initialize Gin router
 	engine = gin.Default()
 
-	// Load HTML templates
-	engine.LoadHTMLGlob("web/templates/*")
+	// Load HTML templates if they exist
+	templatesPath := "web/templates"
+	if _, err := os.Stat(templatesPath); err == nil {
+		pattern := filepath.Join(templatesPath, "*")
+		matches, _ := filepath.Glob(pattern)
+		if len(matches) > 0 {
+			engine.LoadHTMLGlob(pattern)
+			log.Printf("Loaded %d HTML templates from %s", len(matches), pattern)
+		} else {
+			log.Printf("No HTML templates found in %s, skipping template loading", templatesPath)
+		}
+	} else {
+		log.Printf("Templates directory %s not found, skipping template loading", templatesPath)
+	}
 
-	// Serve static files
-	engine.Static("/static", "./web/static")
-	engine.Static("/css", "./web/static/css")
-	engine.Static("/js", "./web/static/js")
+	// Serve static files if they exist
+	staticPath := "./web/static"
+	if _, err := os.Stat(staticPath); err == nil {
+		engine.Static("/static", staticPath)
+		engine.Static("/css", filepath.Join(staticPath, "css"))
+		engine.Static("/js", filepath.Join(staticPath, "js"))
+	}
 
 	// Initialize handlers
 	h := handlers.NewHandlers(services)
