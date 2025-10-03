@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.title}} - KidsPOS</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container">
+        <a class="navbar-brand" href="/">KidsPOS</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="/items">商品</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/sales">販売</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/stores">店舗</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/staffs">スタッフ</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/reports/sales">レポート</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/settings">設定</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="/apk">APK管理</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="mb-0">APKアップロード</h2>
+                </div>
+                <div class="card-body">
+                    {{if .error}}
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        {{.error}}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                    {{end}}
+
+                    <form method="POST" enctype="multipart/form-data">
+                        <div class="mb-3">
+                            <label for="file" class="form-label">APKファイル <span class="text-danger">*</span></label>
+                            <input type="file" class="form-control" id="file" name="file" accept=".apk" required>
+                            <div class="form-text">最大ファイルサイズ: 100MB</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="version" class="form-label">バージョン <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="version" name="version" placeholder="例: 1.0.0" required>
+                            <div class="form-text">セマンティックバージョニング形式を推奨 (例: 1.0.0)</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="versionCode" class="form-label">バージョンコード <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" id="versionCode" name="versionCode" min="1" placeholder="例: 1" required>
+                            <div class="form-text">整数値。新しいバージョンほど大きい値を指定してください</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="releaseNotes" class="form-label">リリースノート</label>
+                            <textarea class="form-control" id="releaseNotes" name="releaseNotes" rows="5" placeholder="このバージョンの変更内容や新機能を記載してください"></textarea>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="/apk" class="btn btn-secondary">キャンセル</a>
+                            <button type="submit" class="btn btn-primary">アップロード</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+// File size validation
+document.getElementById('file').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        const maxSize = 100 * 1024 * 1024; // 100MB
+        if (file.size > maxSize) {
+            alert('ファイルサイズが100MBを超えています。より小さいファイルを選択してください。');
+            e.target.value = '';
+        }
+    }
+});
+</script>
+</body>
+</html>

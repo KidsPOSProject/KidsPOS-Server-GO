@@ -9,6 +9,8 @@
 - **Raspberry Pi対応**: Pi Zero 2Wでも快適に動作
 - **SQLite内蔵**: 外部データベース不要
 - **クロスプラットフォーム**: Linux/macOS/Windows/ARM対応
+- **APK管理機能**: Androidアプリのバージョン管理とOTA配信
+- **完全なCRUD**: 全エンティティで作成・読取・更新・削除をサポート
 
 ## 比較表
 
@@ -45,6 +47,28 @@ go run cmd/server/main.go
 ```
 
 アプリケーションは http://localhost:8080 で起動します。
+
+## 新機能（v2.0）
+
+### 1. Staff/Store の削除・更新機能
+- 物理削除を実装（論理削除ではなくデータベースから完全削除）
+- 外部キー制約の自動チェック（販売履歴がある場合は削除を拒否）
+- Web UIおよびREST API両方に対応
+
+### 2. APKバージョン管理システム
+- **ファイルアップロード**: multipart/form-data形式でAPKファイルをアップロード
+- **バージョン管理**: セマンティックバージョニングとバージョンコードの管理
+- **OTA配信**: Androidアプリから最新版の確認とダウンロード
+- **リリースノート**: 各バージョンの変更内容を記録
+- **ファイルストレージ**: ローカルファイルシステム（`./uploads/apk/`）
+- **バージョン無効化**: 古いバージョンを配信停止（物理削除せず無効化）
+- **Web UI**: アップロード、一覧表示、ダウンロードをブラウザから操作可能
+
+### 3. 包括的なテストスイート
+- **リポジトリ層**: データベース操作の全テスト
+- **サービス層**: ビジネスロジックとファイル処理のテスト
+- **外部キー制約**: 参照整合性の検証テスト
+- テストフレームワーク: `testify` を使用
 
 ## Raspberry Pi向けビルド
 
@@ -131,8 +155,23 @@ make dev
 ### テスト実行
 
 ```bash
+# 全テスト実行
 make test
+
+# または
+go test ./...
+
+# カバレッジ付きテスト
+go test ./... -cover
+
+# 詳細表示
+go test ./... -v
 ```
+
+実装済みのテスト:
+- リポジトリ層テスト（Staff/Store/APK の CRUD操作）
+- サービス層テスト（ビジネスロジックとファイル操作）
+- 外部キー制約の検証テスト
 
 ### コードフォーマット
 
@@ -184,15 +223,55 @@ ALLOWED_IP_PREFIX=192.168.         # 許可IPプレフィックス
 - `GET /staffs` - スタッフ一覧
 - `GET /settings` - 設定
 - `GET /reports/sales` - 売上レポート
+- `GET /apk` - APKバージョン一覧
+- `GET /apk/upload` - APKアップロードページ
+- `POST /apk/upload` - APKアップロード処理
 
 ### REST API
 
+#### 商品 (Items)
 - `GET /api/items` - 商品一覧取得
+- `GET /api/items/:id` - 商品詳細取得
 - `POST /api/items` - 商品作成
 - `PUT /api/items/:id` - 商品更新
 - `DELETE /api/items/:id` - 商品削除
+
+#### 販売 (Sales)
+- `GET /api/sales` - 販売一覧取得
+- `GET /api/sales/:id` - 販売詳細取得
 - `POST /api/sales` - 販売登録
+
+#### 店舗 (Stores)
+- `GET /api/stores` - 店舗一覧取得
+- `GET /api/stores/:id` - 店舗詳細取得
+- `POST /api/stores` - 店舗作成
+- `PUT /api/stores/:id` - 店舗更新
+- `DELETE /api/stores/:id` - 店舗削除（物理削除、販売履歴がある場合はエラー）
+
+#### スタッフ (Staffs)
+- `GET /api/staffs` - スタッフ一覧取得
+- `GET /api/staffs/:id` - スタッフ詳細取得
+- `POST /api/staffs` - スタッフ作成
+- `PUT /api/staffs/:id` - スタッフ更新
+- `DELETE /api/staffs/:id` - スタッフ削除（物理削除、販売履歴がある場合はエラー）
+
+#### 設定 (Settings)
+- `GET /api/settings` - 設定一覧取得
+- `PUT /api/settings/:key` - 設定更新
+
+#### レポート (Reports)
 - `GET /api/reports/sales` - 売上データ取得
+- `GET /api/reports/sales/excel` - 売上データExcelダウンロード
+
+#### APKバージョン管理 (APK Versions)
+- `GET /api/apk/version/latest` - 最新APKバージョン取得
+- `GET /api/apk/version/check?currentVersionCode=X` - アップデート確認
+- `GET /api/apk/version/all` - 全APKバージョン取得
+- `GET /api/apk/download/:id` - APKファイルダウンロード（ID指定）
+- `GET /api/apk/download/latest` - 最新APKファイルダウンロード
+- `POST /api/apk/upload` - APKファイルアップロード
+- `DELETE /api/apk/version/:id` - APKバージョン削除（物理削除）
+- `PUT /api/apk/version/:id/deactivate` - APKバージョン無効化
 
 ## トラブルシューティング
 

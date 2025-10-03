@@ -179,14 +179,41 @@ func (h *Handlers) APIStoresCreate(c *gin.Context) {
 
 // APIStoresUpdate updates a store via API
 func (h *Handlers) APIStoresUpdate(c *gin.Context) {
-	// TODO: Implement store update
-	c.JSON(http.StatusNotImplemented, gin.H{"error": "Not implemented"})
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
+		return
+	}
+
+	var store models.Store
+	if err := c.ShouldBindJSON(&store); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	store.ID = id
+	if err := h.storeService.UpdateStore(&store); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, store)
 }
 
 // APIStoresDelete deletes a store via API
 func (h *Handlers) APIStoresDelete(c *gin.Context) {
-	// TODO: Implement store delete
-	c.JSON(http.StatusNotImplemented, gin.H{"error": "Not implemented"})
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
+		return
+	}
+
+	if err := h.storeService.DeleteStore(id); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Store deleted successfully"})
 }
 
 // APIStaffsList returns staffs list as JSON
@@ -238,14 +265,41 @@ func (h *Handlers) APIStaffsCreate(c *gin.Context) {
 
 // APIStaffsUpdate updates a staff via API
 func (h *Handlers) APIStaffsUpdate(c *gin.Context) {
-	// TODO: Implement staff update
-	c.JSON(http.StatusNotImplemented, gin.H{"error": "Not implemented"})
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
+		return
+	}
+
+	var staff models.Staff
+	if err := c.ShouldBindJSON(&staff); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	staff.ID = id
+	if err := h.staffService.UpdateStaff(&staff); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, staff)
 }
 
 // APIStaffsDelete deletes a staff via API
 func (h *Handlers) APIStaffsDelete(c *gin.Context) {
-	// TODO: Implement staff delete
-	c.JSON(http.StatusNotImplemented, gin.H{"error": "Not implemented"})
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
+		return
+	}
+
+	if err := h.staffService.DeleteStaff(id); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Staff deleted successfully"})
 }
 
 // APISettingsList returns settings list as JSON

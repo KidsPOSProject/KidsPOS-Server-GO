@@ -10,21 +10,23 @@ import (
 
 // Repositories holds all repository instances
 type Repositories struct {
-	Item    *ItemRepository
-	Store   *StoreRepository
-	Staff   *StaffRepository
-	Sale    *SaleRepository
-	Setting *SettingRepository
+	Item       *ItemRepository
+	Store      *StoreRepository
+	Staff      *StaffRepository
+	Sale       *SaleRepository
+	Setting    *SettingRepository
+	ApkVersion *ApkVersionRepository
 }
 
 // NewRepositories creates all repository instances
 func NewRepositories(db *sql.DB) *Repositories {
 	return &Repositories{
-		Item:    &ItemRepository{db: db},
-		Store:   &StoreRepository{db: db},
-		Staff:   &StaffRepository{db: db},
-		Sale:    &SaleRepository{db: db},
-		Setting: &SettingRepository{db: db},
+		Item:       &ItemRepository{db: db},
+		Store:      &StoreRepository{db: db},
+		Staff:      &StaffRepository{db: db},
+		Sale:       &SaleRepository{db: db},
+		Setting:    &SettingRepository{db: db},
+		ApkVersion: &ApkVersionRepository{db: db},
 	}
 }
 
@@ -178,6 +180,56 @@ func (r *StoreRepository) Create(store *models.Store) error {
 	return nil
 }
 
+func (r *StoreRepository) Update(store *models.Store) error {
+	query := `UPDATE store SET name = ?, updatedAt = ? WHERE id = ?`
+
+	now := time.Now()
+	result, err := r.db.Exec(query, store.Name, now, store.ID)
+	if err != nil {
+		return err
+	}
+
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rows == 0 {
+		return fmt.Errorf("store not found")
+	}
+
+	store.UpdatedAt = now
+	return nil
+}
+
+func (r *StoreRepository) Delete(id int) error {
+	// Check if store is referenced in sales
+	checkQuery := `SELECT COUNT(*) FROM sale WHERE storeId = ?`
+	var count int
+	if err := r.db.QueryRow(checkQuery, id).Scan(&count); err != nil {
+		return err
+	}
+	if count > 0 {
+		return fmt.Errorf("cannot delete store: referenced by %d sale(s)", count)
+	}
+
+	// Delete store
+	query := `DELETE FROM store WHERE id = ?`
+	result, err := r.db.Exec(query, id)
+	if err != nil {
+		return err
+	}
+
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rows == 0 {
+		return fmt.Errorf("store not found")
+	}
+
+	return nil
+}
+
 // StaffRepository handles staff data access
 type StaffRepository struct {
 	db *sql.DB
@@ -237,6 +289,56 @@ func (r *StaffRepository) Create(staff *models.Staff) error {
 	staff.ID = int(id)
 	staff.CreatedAt = now
 	staff.UpdatedAt = now
+
+	return nil
+}
+
+func (r *StaffRepository) Update(staff *models.Staff) error {
+	query := `UPDATE staff SET name = ?, updatedAt = ? WHERE id = ?`
+
+	now := time.Now()
+	result, err := r.db.Exec(query, staff.Name, now, staff.ID)
+	if err != nil {
+		return err
+	}
+
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rows == 0 {
+		return fmt.Errorf("staff not found")
+	}
+
+	staff.UpdatedAt = now
+	return nil
+}
+
+func (r *StaffRepository) Delete(id int) error {
+	// Check if staff is referenced in sales
+	checkQuery := `SELECT COUNT(*) FROM sale WHERE staffId = ?`
+	var count int
+	if err := r.db.QueryRow(checkQuery, id).Scan(&count); err != nil {
+		return err
+	}
+	if count > 0 {
+		return fmt.Errorf("cannot delete staff: referenced by %d sale(s)", count)
+	}
+
+	// Delete staff
+	query := `DELETE FROM staff WHERE id = ?`
+	result, err := r.db.Exec(query, id)
+	if err != nil {
+		return err
+	}
+
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rows == 0 {
+		return fmt.Errorf("staff not found")
+	}
 
 	return nil
 }
