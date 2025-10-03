@@ -16,7 +16,7 @@ type Config struct {
 
 func New() *Config {
 	return &Config{
-		DatabasePath:     getEnv("DATABASE_PATH", "./kidspos.db"),
+		DatabasePath:     getEnv("DATABASE_PATH", "/tmp/kidspos.db"),
 		Port:            getEnv("PORT", "8080"),
 		ReceiptPrinterHost: getEnv("RECEIPT_PRINTER_HOST", "localhost"),
 		ReceiptPrinterPort: getEnv("RECEIPT_PRINTER_PORT", "9100"),
