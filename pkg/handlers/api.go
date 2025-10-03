@@ -17,7 +17,7 @@ func (h *Handlers) APIItemsList(c *gin.Context) {
 	}
 
 	if items == nil {
-		items = []models.Item{}
+		items = []*models.Item{}
 	}
 	c.JSON(http.StatusOK, items)
 }
@@ -103,7 +103,7 @@ func (h *Handlers) APISalesList(c *gin.Context) {
 	}
 
 	if sales == nil {
-		sales = []models.Sale{}
+		sales = []*models.Sale{}
 	}
 	c.JSON(http.StatusOK, sales)
 }
@@ -139,7 +139,7 @@ func (h *Handlers) APIStoresList(c *gin.Context) {
 	}
 
 	if stores == nil {
-		stores = []models.Store{}
+		stores = []*models.Store{}
 	}
 	c.JSON(http.StatusOK, stores)
 }
@@ -198,7 +198,7 @@ func (h *Handlers) APIStaffsList(c *gin.Context) {
 	}
 
 	if staffs == nil {
-		staffs = []models.Staff{}
+		staffs = []*models.Staff{}
 	}
 	c.JSON(http.StatusOK, staffs)
 }
@@ -257,7 +257,7 @@ func (h *Handlers) APISettingsList(c *gin.Context) {
 	}
 
 	if settings == nil {
-		settings = []models.Setting{}
+		settings = []*models.Setting{}
 	}
 	c.JSON(http.StatusOK, settings)
 }
@@ -291,7 +291,7 @@ func (h *Handlers) APIReportsSales(c *gin.Context) {
 	}
 
 	if sales == nil {
-		sales = []models.Sale{}
+		sales = []*models.Sale{}
 	}
 
 	// Calculate summary
