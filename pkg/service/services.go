@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/KidsPOSProject/KidsPOS-Server-GO/internal/models"
-	"github.com/KidsPOSProject/KidsPOS-Server-GO/internal/repository"
+	"github.com/KidsPOSProject/KidsPOS-Server-GO/pkg/models"
+	"github.com/KidsPOSProject/KidsPOS-Server-GO/pkg/repository"
 	"github.com/google/uuid"
 )
 

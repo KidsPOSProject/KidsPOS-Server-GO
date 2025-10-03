@@ -4,10 +4,10 @@ import (
 	"log"
 	"os"
 
-	"github.com/KidsPOSProject/KidsPOS-Server-GO/internal/config"
-	"github.com/KidsPOSProject/KidsPOS-Server-GO/internal/handlers"
-	"github.com/KidsPOSProject/KidsPOS-Server-GO/internal/repository"
-	"github.com/KidsPOSProject/KidsPOS-Server-GO/internal/service"
+	"github.com/KidsPOSProject/KidsPOS-Server-GO/pkg/config"
+	"github.com/KidsPOSProject/KidsPOS-Server-GO/pkg/handlers"
+	"github.com/KidsPOSProject/KidsPOS-Server-GO/pkg/repository"
+	"github.com/KidsPOSProject/KidsPOS-Server-GO/pkg/service"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )

@@ -5,8 +5,8 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/KidsPOSProject/KidsPOS-Server-GO/internal/models"
-	"github.com/KidsPOSProject/KidsPOS-Server-GO/internal/service"
+	"github.com/KidsPOSProject/KidsPOS-Server-GO/pkg/models"
+	"github.com/KidsPOSProject/KidsPOS-Server-GO/pkg/service"
 	"github.com/gin-gonic/gin"
 )
 

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/KidsPOSProject/KidsPOS-Server-GO/internal/models"
+	"github.com/KidsPOSProject/KidsPOS-Server-GO/pkg/models"
 )
 
 // Repositories holds all repository instances
