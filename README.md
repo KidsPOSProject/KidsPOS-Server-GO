@@ -12,14 +12,14 @@
 
 ## 比較表
 
-| 項目 | Spring Boot版 | Go版 |
-|------|-------------|------|
-| メモリ使用量 | 512MB+ | **30-50MB** |
-| 起動時間 | 30-45秒 | **2-3秒** |
-| バイナリサイズ | 50MB (JAR) | **15MB** |
-| Raspberry Pi Zero 2W | ❌ 動作困難 | ✅ 快適動作 |
-| Raspberry Pi 3 | ⚠️ 動作するが重い | ✅ 快適動作 |
-| Raspberry Pi 4 | ✅ 動作可能 | ✅ 超快適 |
+| 項目                   | Spring Boot版 | Go版         |
+|----------------------|--------------|-------------|
+| メモリ使用量               | 512MB+       | **30-50MB** |
+| 起動時間                 | 30-45秒       | **2-3秒**    |
+| バイナリサイズ              | 50MB (JAR)   | **15MB**    |
+| Raspberry Pi Zero 2W | ❌ 動作困難       | ✅ 快適動作      |
+| Raspberry Pi 3       | ⚠️ 動作するが重い   | ✅ 快適動作      |
+| Raspberry Pi 4       | ✅ 動作可能       | ✅ 超快適       |
 
 ## クイックスタート
 
@@ -176,6 +176,7 @@ ALLOWED_IP_PREFIX=192.168.         # 許可IPプレフィックス
 ## API エンドポイント
 
 ### Web UI
+
 - `GET /` - ホーム
 - `GET /items` - 商品一覧
 - `GET /sales` - 販売一覧
@@ -185,6 +186,7 @@ ALLOWED_IP_PREFIX=192.168.         # 許可IPプレフィックス
 - `GET /reports/sales` - 売上レポート
 
 ### REST API
+
 - `GET /api/items` - 商品一覧取得
 - `POST /api/items` - 商品作成
 - `PUT /api/items/:id` - 商品更新

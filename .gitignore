@@ -53,3 +53,4 @@ temp/
 
 # Air for live reload
 .air.toml
+.vercel

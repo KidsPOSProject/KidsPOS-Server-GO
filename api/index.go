@@ -1,23 +1,23 @@
-package main
+package handler
 
 import (
 	"log"
-	"os"
+	"net/http"
 
 	"github.com/KidsPOSProject/KidsPOS-Server-GO/internal/config"
 	"github.com/KidsPOSProject/KidsPOS-Server-GO/internal/handlers"
 	"github.com/KidsPOSProject/KidsPOS-Server-GO/internal/repository"
 	"github.com/KidsPOSProject/KidsPOS-Server-GO/internal/service"
 	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
 )
 
-func main() {
-	// Load .env file if exists
-	if err := godotenv.Load(); err != nil {
-		log.Println("No .env file found")
-	}
+var (
+	engine *gin.Engine
+)
 
+// init関数でGinエンジンを初期化します
+// Vercelのサーバーレス環境では、この初期化はコールドスタート時に一度だけ実行されます
+func init() {
 	// Initialize configuration
 	cfg := config.New()
 
@@ -26,7 +26,6 @@ func main() {
 	if err != nil {
 		log.Fatal("Failed to initialize database:", err)
 	}
-	defer db.Close()
 
 	// Run migrations
 	if err := repository.RunMigrations(db); err != nil {
@@ -40,31 +39,25 @@ func main() {
 	services := service.NewServices(repos)
 
 	// Initialize Gin router
-	router := gin.Default()
+	engine = gin.Default()
 
 	// Load HTML templates
-	router.LoadHTMLGlob("web/templates/*")
+	engine.LoadHTMLGlob("web/templates/*")
 
 	// Serve static files
-	router.Static("/static", "./web/static")
-	router.Static("/css", "./web/static/css")
-	router.Static("/js", "./web/static/js")
+	engine.Static("/static", "./web/static")
+	engine.Static("/css", "./web/static/css")
+	engine.Static("/js", "./web/static/js")
 
 	// Initialize handlers
 	h := handlers.NewHandlers(services)
 
 	// Setup routes
-	handlers.SetupRoutes(router, h)
-
-	// Get port from environment or use default
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8080"
-	}
-
-	log.Printf("Server starting on port %s", port)
-	if err := router.Run(":" + port); err != nil {
-		log.Fatal("Failed to start server:", err)
-	}
+	handlers.SetupRoutes(engine, h)
 }
 
+// Handler はVercelがリクエストを処理するために呼び出す関数です
+func Handler(w http.ResponseWriter, r *http.Request) {
+	// Ginエンジンにリクエストを渡して処理させます
+	engine.ServeHTTP(w, r)
+}
