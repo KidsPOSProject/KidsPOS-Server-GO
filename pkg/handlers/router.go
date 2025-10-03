@@ -35,6 +35,10 @@ func SetupRoutes(router *gin.Engine, h *Handlers) {
 	router.GET("/settings", h.SettingsList)
 	router.GET("/reports/sales", h.ReportsSales)
 
+	router.GET("/apk", h.ApkList)
+	router.GET("/apk/upload", h.ApkUploadPage)
+	router.POST("/apk/upload", h.ApkUpload)
+
 	// API routes
 	api := router.Group("/api")
 	{
@@ -65,5 +69,14 @@ func SetupRoutes(router *gin.Engine, h *Handlers) {
 
 		api.GET("/reports/sales", h.APIReportsSales)
 		api.GET("/reports/sales/excel", h.APIReportsSalesExcel)
+
+		api.GET("/apk/version/latest", h.APIApkLatest)
+		api.GET("/apk/version/check", h.APIApkCheckUpdate)
+		api.GET("/apk/version/all", h.APIApkVersions)
+		api.GET("/apk/download/:id", h.APIApkDownload)
+		api.GET("/apk/download/latest", h.APIApkDownloadLatest)
+		api.POST("/apk/upload", h.APIApkUpload)
+		api.DELETE("/apk/version/:id", h.APIApkDelete)
+		api.PUT("/apk/version/:id/deactivate", h.APIApkDeactivate)
 	}
 }

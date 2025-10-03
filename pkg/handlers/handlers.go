@@ -12,21 +12,23 @@ import (
 
 // Handlers holds all handler instances
 type Handlers struct {
-	itemService    *service.ItemService
-	storeService   *service.StoreService
-	staffService   *service.StaffService
-	saleService    *service.SaleService
-	settingService *service.SettingService
+	itemService       *service.ItemService
+	storeService      *service.StoreService
+	staffService      *service.StaffService
+	saleService       *service.SaleService
+	settingService    *service.SettingService
+	apkVersionService *service.ApkVersionService
 }
 
 // NewHandlers creates handler instances
 func NewHandlers(services *service.Services) *Handlers {
 	return &Handlers{
-		itemService:    services.Item,
-		storeService:   services.Store,
-		staffService:   services.Staff,
-		saleService:    services.Sale,
-		settingService: services.Setting,
+		itemService:       services.Item,
+		storeService:      services.Store,
+		staffService:      services.Staff,
+		saleService:       services.Sale,
+		settingService:    services.Setting,
+		apkVersionService: services.ApkVersion,
 	}
 }
 
@@ -261,13 +263,34 @@ func (h *Handlers) StoresEdit(c *gin.Context) {
 
 // StoresUpdate updates a store
 func (h *Handlers) StoresUpdate(c *gin.Context) {
-	// TODO: Implement store update
+	id := atoi(c.Param("id"))
+	store := &models.Store{
+		ID:   id,
+		Name: c.PostForm("name"),
+	}
+
+	if err := h.storeService.UpdateStore(store); err != nil {
+		c.HTML(http.StatusBadRequest, "stores/edit.html", gin.H{
+			"title": "Edit Store",
+			"error": err.Error(),
+			"store": store,
+		})
+		return
+	}
+
 	c.Redirect(http.StatusSeeOther, "/stores")
 }
 
 // StoresDelete deletes a store
 func (h *Handlers) StoresDelete(c *gin.Context) {
-	// TODO: Implement store delete
+	id := atoi(c.Param("id"))
+	if err := h.storeService.DeleteStore(id); err != nil {
+		c.HTML(http.StatusInternalServerError, "error.html", gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
 	c.Redirect(http.StatusSeeOther, "/stores")
 }
 
@@ -331,13 +354,34 @@ func (h *Handlers) StaffsEdit(c *gin.Context) {
 
 // StaffsUpdate updates a staff
 func (h *Handlers) StaffsUpdate(c *gin.Context) {
-	// TODO: Implement staff update
+	id := atoi(c.Param("id"))
+	staff := &models.Staff{
+		ID:   id,
+		Name: c.PostForm("name"),
+	}
+
+	if err := h.staffService.UpdateStaff(staff); err != nil {
+		c.HTML(http.StatusBadRequest, "staffs/edit.html", gin.H{
+			"title": "Edit Staff",
+			"error": err.Error(),
+			"staff": staff,
+		})
+		return
+	}
+
 	c.Redirect(http.StatusSeeOther, "/staffs")
 }
 
 // StaffsDelete deletes a staff
 func (h *Handlers) StaffsDelete(c *gin.Context) {
-	// TODO: Implement staff delete
+	id := atoi(c.Param("id"))
+	if err := h.staffService.DeleteStaff(id); err != nil {
+		c.HTML(http.StatusInternalServerError, "error.html", gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
 	c.Redirect(http.StatusSeeOther, "/staffs")
 }
 

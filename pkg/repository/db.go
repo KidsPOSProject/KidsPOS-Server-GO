@@ -104,6 +104,20 @@ func RunMigrations(db *sql.DB) error {
 		updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP
 	);
 
+	CREATE TABLE IF NOT EXISTS apk_versions (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		version TEXT NOT NULL UNIQUE,
+		versionCode INTEGER NOT NULL,
+		fileName TEXT NOT NULL,
+		fileSize INTEGER NOT NULL,
+		filePath TEXT NOT NULL,
+		releaseNotes TEXT,
+		isActive INTEGER NOT NULL DEFAULT 1,
+		uploadedAt DATETIME NOT NULL,
+		createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+		updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP
+	);
+
 	-- Create indexes
 	CREATE INDEX IF NOT EXISTS idx_item_itemId ON item(itemId);
 	CREATE INDEX IF NOT EXISTS idx_item_isDeleted ON item(isDeleted);
@@ -112,6 +126,9 @@ func RunMigrations(db *sql.DB) error {
 	CREATE INDEX IF NOT EXISTS idx_sale_saleAt ON sale(saleAt);
 	CREATE INDEX IF NOT EXISTS idx_sale_detail_saleId ON sale_detail(saleId);
 	CREATE INDEX IF NOT EXISTS idx_sale_detail_itemId ON sale_detail(itemId);
+	CREATE INDEX IF NOT EXISTS idx_apk_versions_versionCode ON apk_versions(versionCode);
+	CREATE INDEX IF NOT EXISTS idx_apk_versions_isActive ON apk_versions(isActive);
+	CREATE INDEX IF NOT EXISTS idx_apk_versions_uploadedAt ON apk_versions(uploadedAt);
 
 	-- Insert default settings if not exists
 	INSERT OR IGNORE INTO setting (key, value, type, description) VALUES

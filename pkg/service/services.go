@@ -11,21 +11,23 @@ import (
 
 // Services holds all service instances
 type Services struct {
-	Item    *ItemService
-	Store   *StoreService
-	Staff   *StaffService
-	Sale    *SaleService
-	Setting *SettingService
+	Item       *ItemService
+	Store      *StoreService
+	Staff      *StaffService
+	Sale       *SaleService
+	Setting    *SettingService
+	ApkVersion *ApkVersionService
 }
 
 // NewServices creates all service instances
 func NewServices(repos *repository.Repositories) *Services {
 	return &Services{
-		Item:    &ItemService{repo: repos.Item},
-		Store:   &StoreService{repo: repos.Store},
-		Staff:   &StaffService{repo: repos.Staff},
-		Sale:    &SaleService{repo: repos.Sale, itemRepo: repos.Item},
-		Setting: &SettingService{repo: repos.Setting},
+		Item:       &ItemService{repo: repos.Item},
+		Store:      &StoreService{repo: repos.Store},
+		Staff:      &StaffService{repo: repos.Staff},
+		Sale:       &SaleService{repo: repos.Sale, itemRepo: repos.Item},
+		Setting:    &SettingService{repo: repos.Setting},
+		ApkVersion: NewApkVersionService(repos.ApkVersion),
 	}
 }
 
@@ -113,6 +115,19 @@ func (s *StoreService) CreateStore(store *models.Store) error {
 	return s.repo.Create(store)
 }
 
+func (s *StoreService) UpdateStore(store *models.Store) error {
+	// Validate
+	if store.Name == "" {
+		return fmt.Errorf("store name is required")
+	}
+
+	return s.repo.Update(store)
+}
+
+func (s *StoreService) DeleteStore(id int) error {
+	return s.repo.Delete(id)
+}
+
 func (s *StoreService) generateStoreID() string {
 	return fmt.Sprintf("STORE-%s", uuid.New().String()[:8])
 }
@@ -142,6 +157,19 @@ func (s *StaffService) CreateStaff(staff *models.Staff) error {
 	}
 
 	return s.repo.Create(staff)
+}
+
+func (s *StaffService) UpdateStaff(staff *models.Staff) error {
+	// Validate
+	if staff.Name == "" {
+		return fmt.Errorf("staff name is required")
+	}
+
+	return s.repo.Update(staff)
+}
+
+func (s *StaffService) DeleteStaff(id int) error {
+	return s.repo.Delete(id)
 }
 
 func (s *StaffService) generateStaffID() string {
